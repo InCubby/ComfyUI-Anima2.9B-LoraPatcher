@@ -8,8 +8,6 @@ BLOCK_PATTERNS = [
     re.compile(r"(?P<prefix>(?:^|[_./])(?:net[_./])?blocks[_./])(?P<idx>\d+)(?P<suffix>(?:[_./]|$))"),
 ]
 
-ANIMA_SIGNATURES = ("adaln_modulation", "cross_attn")
-
 DEFAULT_OLD_BLOCK_COUNT = 28
 DEFAULT_NEW_BLOCK_COUNT = 40
 DEFAULT_INSERTIONS = [2, 5, 8, 11, 14, 17, 21, 24, 27, 30, 33, 36]
@@ -109,17 +107,11 @@ def remap_key(key, old_to_new):
 
 def detect_anima_28(keys):
     indices = []
-    has_signature = False
     for key in keys:
-        if not has_signature:
-            for sig in ANIMA_SIGNATURES:
-                if sig in key:
-                    has_signature = True
-                    break
         for pat in BLOCK_PATTERNS:
             for m in pat.finditer(key):
                 indices.append(int(m.group("idx")))
-    if not indices or not has_signature:
+    if not indices:
         return False
     return max(indices) <= 27
 

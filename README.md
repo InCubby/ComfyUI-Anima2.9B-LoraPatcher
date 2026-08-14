@@ -4,8 +4,8 @@ A ComfyUI custom node that hot-patches LoRA weights trained on the original
 **28-block Anima** model so they align with the official **40-block
 [Anima-2.9B](https://huggingface.co/Gazingstars123/Anima-2.9B)**.
 
-Works on a single LoRA or a whole `lora_stack` (e.g. output from LoRA Manager):
-each entry is detected, remapped in memory, and applied with the standard
+Works on a whole `lora_stack` (e.g. output from LoRA Manager): each entry
+is detected, remapped in memory, and applied with the standard
 `comfy.sd.load_lora_for_models` pipeline. No file is written to disk.
 
 ## Credits
@@ -42,16 +42,12 @@ Node: **Anima2.9BLoraPatcher** (category: loaders)
 
 Inputs:
 
-| Input            | Type       | Description |
-|------------------|------------|-------------|
-| `model`          | MODEL      | Anima-2.9B model (40 blocks) |
-| `clip`           | CLIP       | Text encoder, passed through |
-| `lora_name`      | dropdown   | Single LoRA to load (ignored when `lora_stack` is connected) |
-| `strength_model` | FLOAT      | Model strength |
-| `strength_clip`  | FLOAT      | CLIP strength |
-| `remap_mode`     | auto/force/off | auto: detect 28-block Anima LoRAs; force: always remap; off: behave like the vanilla LoraLoader |
-| `fill_inserted`  | none/copy   | none (recommended): inserted blocks get no LoRA patch; copy: duplicate the neighbor-source LoRA onto inserted blocks |
-| `lora_stack`     | LORA_STACK  | Optional: process every entry in the stack |
+| Input           | Type       | Description |
+|-----------------|------------|-------------|
+| `model`         | MODEL      | Anima-2.9B model (40 blocks) |
+| `clip`          | CLIP       | Text encoder, passed through |
+| `lora_stack`    | LORA_STACK | Every entry is processed in order |
+| `fill_inserted` | none/copy   | none (recommended): inserted blocks get no LoRA patch; copy: duplicate the neighbor-source LoRA onto inserted blocks |
 
 Outputs: `MODEL`, `CLIP`, and a `report` string listing what happened to
 each entry plus the 28→40 alignment table.
@@ -68,9 +64,9 @@ pass through untouched.
   e.g. old block `2` → new block `3`, old block `27` → new block `39`.
 - Inserted blocks are left without patches by default (`fill_inserted=none`),
   matching the "muted init" idea of Anima-2.9B's expansion recipe.
-- Detection is heuristic: Anima-style signature keys (`adaln_modulation` /
-  `cross_attn`) plus max block index ≤ 27. If auto detection misses a
-  partial LoRA, set `remap_mode` to `force`.
+- Detection is heuristic: any LoRA whose `blocks.<idx>` keys have a max
+  index ≤ 27 is treated as a 28-block Anima LoRA and remapped; everything
+  else passes through untouched.
 
 ## Notes
 

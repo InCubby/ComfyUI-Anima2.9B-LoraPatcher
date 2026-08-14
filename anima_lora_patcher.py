@@ -24,14 +24,8 @@ class Anima2_9BLoraPatcher:
             "required": {
                 "model": ("MODEL",),
                 "clip": ("CLIP",),
-                "lora_name": (folder_paths.get_filename_list("loras"),),
-                "strength_model": ("FLOAT", {"default": 1.0, "min": -20.0, "max": 20.0, "step": 0.01}),
-                "strength_clip": ("FLOAT", {"default": 1.0, "min": -20.0, "max": 20.0, "step": 0.01}),
-                "remap_mode": (["auto", "force", "off"],),
-                "fill_inserted": (["none", "copy"],),
-            },
-            "optional": {
                 "lora_stack": ("LORA_STACK",),
+                "fill_inserted": (["none", "copy"],),
             },
         }
 
@@ -47,17 +41,14 @@ class Anima2_9BLoraPatcher:
             return path
         return folder_paths.get_annotated_filepath(name)
 
-    def patch(self, model, clip, lora_name, strength_model, strength_clip, remap_mode, fill_inserted, lora_stack=None):
+    def patch(self, model, clip, fill_inserted, lora_stack=None):
         manifest = anima_remap.load_manifest()
 
-        if lora_stack is not None:
-            entries = [tuple(e) for e in lora_stack]
-        else:
-            entries = [(lora_name, strength_model, strength_clip)]
+        entries = [tuple(e) for e in (lora_stack or [])]
 
         report = [
             "Anima2.9B LoRA Patcher",
-            "remap_mode={}  fill_inserted={}".format(remap_mode, fill_inserted),
+            "fill_inserted={}".format(fill_inserted),
         ]
         warnings = []
         any_remap = False
@@ -84,9 +75,7 @@ class Anima2_9BLoraPatcher:
                 report.append("[error] {}: {}".format(name, exc))
                 continue
 
-            should_remap = remap_mode == "force" or (
-                remap_mode == "auto" and anima_remap.detect_anima_28(lora.keys())
-            )
+            should_remap = anima_remap.detect_anima_28(lora.keys())
 
             if should_remap:
                 lora, stats, unmapped = anima_remap.remap_lora_dict(lora, manifest, fill_inserted=fill_inserted)
