@@ -1,5 +1,7 @@
 # ComfyUI-Anima2.9B-LoraPatcher
 
+English | [中文](README.zh-CN.md)
+
 A ComfyUI custom node that hot-patches LoRA weights trained on the original
 **28-block Anima** model so they align with the official **40-block
 [Anima-2.9B](https://huggingface.co/Gazingstars123/Anima-2.9B)**.
