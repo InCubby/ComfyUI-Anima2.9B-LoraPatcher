@@ -49,6 +49,7 @@ Inputs:
 | `model`         | MODEL      | Anima-2.9B model (40 blocks) |
 | `clip`          | CLIP       | Text encoder, passed through |
 | `lora_stack`    | LORA_STACK | Every entry is processed in order |
+| `enable_remap`  | BOOLEAN   | On (default): detect and remap 28-block Anima LoRAs; off: load every entry as-is, no patching |
 | `fill_inserted` | none/copy   | none (recommended): inserted blocks get no LoRA patch; copy: duplicate the neighbor-source LoRA onto inserted blocks |
 
 Outputs: `MODEL`, `CLIP`, and a `report` string listing what happened to

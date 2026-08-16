@@ -25,6 +25,7 @@ class Anima2_9BLoraPatcher:
                 "model": ("MODEL",),
                 "clip": ("CLIP",),
                 "lora_stack": ("LORA_STACK",),
+                "enable_remap": ("BOOLEAN", {"default": True}),
                 "fill_inserted": (["none", "copy"],),
             },
         }
@@ -41,14 +42,14 @@ class Anima2_9BLoraPatcher:
             return path
         return folder_paths.get_annotated_filepath(name)
 
-    def patch(self, model, clip, fill_inserted, lora_stack=None):
+    def patch(self, model, clip, lora_stack, enable_remap, fill_inserted):
         manifest = anima_remap.load_manifest()
 
         entries = [tuple(e) for e in (lora_stack or [])]
 
         report = [
             "Anima2.9B LoRA Patcher",
-            "fill_inserted={}".format(fill_inserted),
+            "enable_remap={}  fill_inserted={}".format(enable_remap, fill_inserted),
         ]
         warnings = []
         any_remap = False
@@ -75,7 +76,7 @@ class Anima2_9BLoraPatcher:
                 report.append("[error] {}: {}".format(name, exc))
                 continue
 
-            should_remap = anima_remap.detect_anima_28(lora.keys())
+            should_remap = enable_remap and anima_remap.detect_anima_28(lora.keys())
 
             if should_remap:
                 lora, stats, unmapped = anima_remap.remap_lora_dict(lora, manifest, fill_inserted=fill_inserted)
@@ -90,7 +91,10 @@ class Anima2_9BLoraPatcher:
                 if len(unmapped) > 10:
                     warnings.append("  ... {} more dropped keys".format(len(unmapped) - 10))
             else:
-                report.append("[pass] {} (sm={:.2f}, sc={:.2f})".format(name, sm, sc))
+                if enable_remap:
+                    report.append("[pass] {} (sm={:.2f}, sc={:.2f})".format(name, sm, sc))
+                else:
+                    report.append("[off] {} (loaded as-is)".format(name))
 
             try:
                 model, clip = comfy.sd.load_lora_for_models(model, clip, lora, sm, sc)

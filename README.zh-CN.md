@@ -45,6 +45,7 @@ git clone https://github.com/InCubby/ComfyUI-Anima2.9B-LoraPatcher.git
 | `model`         | MODEL      | Anima-2.9B 模型（40 块） |
 | `clip`          | CLIP       | 文本编码器，原样传递 |
 | `lora_stack`    | LORA_STACK | 按顺序处理栈中的每一条目 |
+| `enable_remap`  | BOOLEAN   | 开启（默认）：检测并重映射 28 块 Anima LoRA；关闭：按栈原样加载，不修补 |
 | `fill_inserted` | none/copy   | none（推荐）：插入块不应用 LoRA 补丁；copy：将相邻源块上的 LoRA 复制到插入块 |
 
 输出：`MODEL`、`CLIP`，以及一个 `report` 字符串，列出每个条目的处理结果
